@@ -8,8 +8,42 @@ const UpdateUser = ({user, onUserUpdated, onCancel}) => {
   const [age, setAge] = useState(user.age.toString());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [inputError, setInputError] = useState({name: '', email: '', age: ''});
+
+  const validateInputs = () => {
+    let isValid = true;
+    let errors = {name: '', email: '', age: ''};
+
+    // Name validation: Only letters
+    const nameRegex = /^[A-Za-z\s]+$/;
+    if (!nameRegex.test(name)) {
+      errors.name = 'Name must only contain letters.';
+      isValid = false;
+    }
+
+    // Email validation: Must be a valid email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      errors.email = 'Please enter a valid email.';
+      isValid = false;
+    }
+
+    // Age validation: Must be a number
+    const ageRegex = /^[0-9]+$/;
+    if (!ageRegex.test(age)) {
+      errors.age = 'Age must only contain numbers.';
+      isValid = false;
+    }
+
+    setInputError(errors);
+    return isValid;
+  };
 
   const updateUser = async () => {
+    if (!validateInputs()) {
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -65,12 +99,21 @@ const UpdateUser = ({user, onUserUpdated, onCancel}) => {
         value={name}
         onChangeText={setName}
       />
+      {inputError.name ? (
+        <Text style={styles.error}>{inputError.name}</Text>
+      ) : null}
+
       <TextInput
         style={styles.input}
         placeholder="Email"
         value={email}
         onChangeText={setEmail}
+        keyboardType="email-address"
       />
+      {inputError.email ? (
+        <Text style={styles.error}>{inputError.email}</Text>
+      ) : null}
+
       <TextInput
         style={styles.input}
         placeholder="Age"
@@ -78,6 +121,10 @@ const UpdateUser = ({user, onUserUpdated, onCancel}) => {
         onChangeText={setAge}
         keyboardType="numeric"
       />
+      {inputError.age ? (
+        <Text style={styles.error}>{inputError.age}</Text>
+      ) : null}
+
       <View style={styles.buttonContainer}>
         <Button title="Update User" onPress={updateUser} disabled={loading} />
         <Button title="Cancel" onPress={onCancel} color="red" />
@@ -102,7 +149,11 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10, // Add space between buttons
+    marginBottom: 10,
+  },
+  error: {
+    color: 'red',
+    marginBottom: 10,
   },
 });
 
